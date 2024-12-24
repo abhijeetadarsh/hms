@@ -1,0 +1,19 @@
+services:
+  mysql:
+    image: mysql:8.0-oracle # Use the official MySQL 8.0 image
+    container_name: hms_container # Name of the container
+    environment:
+      MYSQL_ROOT_PASSWORD: root # Root password
+      MYSQL_DATABASE: hms_db # Database name
+      MYSQL_USER: abhijeetadarsh # Username
+      MYSQL_PASSWORD: 1234 # Password for the user
+    volumes:
+      - ./mysql_data:/var/lib/mysql # Mount the volume for data persistence
+    networks:
+      - hms_network # Attach the container to the custom network
+    ports:
+      - "3306:3306" # Expose the MySQL port
+
+networks:
+  hms_network:
+    driver: bridge # Use the bridge driver for the network
