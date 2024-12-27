@@ -15,30 +15,52 @@ public class UserController {
     UserService userService;
 
     @Autowired
-    public UserController (UserService userService) {
+    public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        System.out.println(user);
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
         try {
-            userService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
+            User user = userService.getUserById(id);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PostMapping("/login")
-    public void loginUser(@RequestParam String username, @RequestParam String password) {
-        System.out.println(username + " " + password);
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateUser(@PathVariable int id, @RequestBody User user) {
+        try {
+            boolean isUpdated = userService.updateUser(id, user);
+            if (isUpdated) {
+                return ResponseEntity.ok("User updated successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable int id) {
+        try {
+            boolean isDeleted = userService.deleteUser(id);
+            if (isDeleted) {
+                return ResponseEntity.ok("User deleted successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
 
-//            getUserById
-//    updateUser
-//            deleteUser
     // Endpoint to fetch all users (for admin purposes)
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() {
