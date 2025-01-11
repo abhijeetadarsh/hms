@@ -1,0 +1,34 @@
+services:
+  mysql:
+    image: mysql:8.0-oracle
+    container_name: hms_container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hms_db
+      MYSQL_USER: abhijeetadarsh
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - ../mysql_data:/var/lib/mysql
+    networks:
+      - hms_network
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "abhijeetadarsh",
+          "-p1234",
+        ]
+      interval: 10s
+      retries: 5
+
+networks:
+  hms_network:
+    name: hms_network
+    driver: bridge

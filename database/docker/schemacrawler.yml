@@ -1,0 +1,24 @@
+services:
+  schemacrawler:
+    image: schemacrawler/schemacrawler
+    container_name: sc_container
+    volumes:
+      - ../output:/output
+    networks:
+      - hms_network
+    command: >
+      /opt/schemacrawler/bin/schemacrawler.sh
+      --server=mysql
+      --host=hms_container
+      --port=3306
+      --user=root
+      --password=root
+      --info-level=standard
+      --command=schema
+      --output-format=png
+      --output-file=/output/schema_output.png
+
+networks:
+  hms_network:
+    name: hms_network
+    external: true
