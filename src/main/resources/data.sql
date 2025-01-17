@@ -1,15 +1,16 @@
 -- Generate Users
-INSERT INTO user (username, password, email) VALUES
-('doc1', 'hash1', 'doc1@hospital.com'),
-('doc2', 'hash2', 'doc2@hospital.com'),
-('rec1', 'hash3', 'rec1@hospital.com'),
-('rec2', 'hash4', 'rec2@hospital.com'),
-('pat1', 'hash5', 'pat1@hospital.com'),
-('pat2', 'hash6', 'pat2@hospital.com'),
-('pat3', 'hash7', 'pat3@hospital.com'),
-('pat4', 'hash8', 'pat4@hospital.com'),
-('pat5', 'hash9', 'pat5@hospital.com'),
-('pat6', 'hash10', 'pat6@hospital.com');
+INSERT INTO user (username, password, email, role, is_active) VALUES 
+('admin', '$2a$12$wARXPwy2nQDUwA4NZgVLYutZLnPCXBbhGDblyAtTQOr.Mv2n.GN0G', 'admin@hms.abhijeetadarsh.online', 'ADMIN', 1),
+('doc1', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'doc1@hospital.com', 'DOCTOR', 1),
+('doc2', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'doc2@hospital.com', 'DOCTOR', 1),
+('rec1', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'rec1@hospital.com', 'RECEPTIONIST', 1),
+('rec2', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'rec2@hospital.com', 'RECEPTIONIST', 1),
+('pat1', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat1@hospital.com', 'PATIENT', 1),
+('pat2', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat2@hospital.com', 'PATIENT', 1),
+('pat3', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat3@hospital.com', 'PATIENT', 1),
+('pat4', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat4@hospital.com', 'PATIENT', 1),
+('pat5', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat5@hospital.com', 'PATIENT', 1),
+('pat6', '$2a$12$xCfGFE10Svuq.XGF4ceSHOTmajViO5Ekv.5hXtB2/4yrf3LzlxIAa', 'pat6@hospital.com', 'PATIENT', 1);
 
 -- Generate Staff
 INSERT INTO staff (user_id, name, join_date, contact, address) VALUES

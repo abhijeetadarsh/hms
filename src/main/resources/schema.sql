@@ -1,3 +1,5 @@
+DROP VIEW IF EXISTS user_view;
+
 -- Drop tables with foreign key dependencies first
 DROP TABLE IF EXISTS medical_record CASCADE;
 DROP TABLE IF EXISTS prescription CASCADE;
@@ -23,8 +25,9 @@ CREATE TABLE user (
     username VARCHAR(50) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    role ENUM ('ADMIN', 'DOCTOR', 'PATIENT', 'RECEPTIONIST') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_active BOOLEAN DEFAULT true
+    is_active BOOLEAN DEFAULT false
 );
 
 -- Create STAFF table which inherits from USER
@@ -97,7 +100,7 @@ CREATE TABLE appointment (
     doctor_user_id BIGINT UNSIGNED,
     booked_by_user_id BIGINT UNSIGNED,
     appointment_time TIMESTAMP NOT NULL,
-    status VARCHAR(20) NOT NULL,
+    status ENUM ('Scheduled', 'Completed', 'Cancelled', 'No-Show') NOT NULL,
     reason TEXT NOT NULL,
     booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     token_number INTEGER,
@@ -143,7 +146,7 @@ CREATE TABLE laboratory_test (
     test_name VARCHAR(100) NOT NULL,
     test_cost DECIMAL(10,2) NOT NULL,
     test_time TIMESTAMP NOT NULL,
-    test_status VARCHAR(20) NOT NULL,
+    test_status ENUM ('Pending', 'In Progress', 'Completed', 'Cancelled') NOT NULL,
     result TEXT,
     normal_range TEXT,
     FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id) ON DELETE CASCADE
@@ -170,7 +173,7 @@ CREATE TABLE billing (
     medicine_charges DECIMAL(10,2) DEFAULT 0.00,
     lab_charges DECIMAL(10,2) DEFAULT 0.00,
     total_amount DECIMAL(10,2) NOT NULL,
-    payment_status VARCHAR(20) NOT NULL,
+    payment_status ENUM ('Pending', 'Paid', 'Cancelled', 'Refunded') NOT NULL,
     payment_method VARCHAR(50),
     FOREIGN KEY (patient_user_id) REFERENCES patient(user_id) ON DELETE CASCADE,
     FOREIGN KEY (appointment_id) REFERENCES appointment(appointment_id) ON DELETE CASCADE
@@ -185,15 +188,7 @@ CREATE INDEX idx_prescription_patient ON prescription(patient_user_id);
 CREATE INDEX idx_prescription_doctor ON prescription(doctor_user_id);
 CREATE INDEX idx_doctor_department ON doctor(department_id);
 
--- Add constraints for enum-like columns
-ALTER TABLE appointment
-ADD CONSTRAINT valid_appointment_status
-CHECK (status IN ('Scheduled', 'Completed', 'Cancelled', 'No-Show'));
-
-ALTER TABLE billing
-ADD CONSTRAINT valid_payment_status
-CHECK (payment_status IN ('Pending', 'Paid', 'Cancelled', 'Refunded'));
-
-ALTER TABLE laboratory_test
-ADD CONSTRAINT valid_test_status
-CHECK (test_status IN ('Pending', 'In Progress', 'Completed', 'Cancelled'));
+-- Create a view to simplify user queries
+CREATE VIEW user_view AS
+SELECT user_id, username, email, role, created_at, is_active
+FROM user;

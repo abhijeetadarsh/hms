@@ -5,8 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class Doctor extends User {
-    private Long departmentId;
-    private String specialization;
-    private String qualification;
+public class Receptionist extends Staff {
+    private String shift;
+    private String deskLocation;
 }
