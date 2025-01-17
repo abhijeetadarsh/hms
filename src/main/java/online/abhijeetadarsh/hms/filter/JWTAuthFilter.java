@@ -4,10 +4,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import online.abhijeetadarsh.hms.model.User;
-import online.abhijeetadarsh.hms.security.JWTService;
+import online.abhijeetadarsh.hms.service.JWTService;
 import online.abhijeetadarsh.hms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,11 +29,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
-        System.out.println(path);
+        System.out.println(request);
 
         // Skip auth for public paths
         if (isPublicPath(path)) {
@@ -51,10 +55,13 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Get user and set in request attribute
+        // [TODO] Check if user exists
+
         String userId = jwtService.getUserIdFromToken(token);
-        User user = userService.getUserById(Integer.parseInt(userId));
-        request.setAttribute("user", user);
+        User user = userService.getUserById(Long.parseLong(userId));
+
+        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(user, null, userService.getAuthorities(user));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
         filterChain.doFilter(request, response);
     }
