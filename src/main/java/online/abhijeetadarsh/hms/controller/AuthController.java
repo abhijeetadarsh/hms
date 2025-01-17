@@ -1,15 +1,11 @@
 package online.abhijeetadarsh.hms.controller;
 
-import online.abhijeetadarsh.hms.dto.LoginRequest;
-import online.abhijeetadarsh.hms.dto.RegisterRequest;
-import online.abhijeetadarsh.hms.exception.UnauthorizedException;
+import online.abhijeetadarsh.hms.dto.*;
 import online.abhijeetadarsh.hms.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -20,28 +16,23 @@ public class AuthController {
         this.authService = authService;
     }
 
-
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest) {
-        try {
-            return ResponseEntity.ok(authService.login(loginRequest.getUsername(), loginRequest.getPassword()));
-        } catch (UnauthorizedException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
-        }
+    @PostMapping("/register")
+    public ResponseEntity<MessageResponse> register(@RequestBody RegisterRequest request) {
+        System.out.println(request);
+        MessageResponse response = authService.register(request);
+        return ResponseEntity.ok(response);
     }
 
-    // No logout endpoint needed as JWTs are stateless
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        System.out.println(request);
+        LoginResponse response = authService.login(request);
+        return ResponseEntity.ok(response);
+    }
 
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest request) {
-        try {
-            authService.register(request.getUsername(), request.getPassword(), request.getEmail(), request.getName(), request.getGender(), request.getContactNumber(), request.getAddress(), request.getRole());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
-        }
+    @PutMapping("/password")
+    public ResponseEntity<MessageResponse> changePassword(@RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok().build();
     }
 }

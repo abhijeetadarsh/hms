@@ -1,3 +1,6 @@
+# Archives
+*.tar.xz
+
 # Compiled class file
 *.class
 
