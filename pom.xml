@@ -90,14 +90,12 @@
         </dependency>
         -->
 
-        <!-- Testing (Commented) -->
-        <!--
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        -->
     </dependencies>
 
     <!-- Build Configuration -->

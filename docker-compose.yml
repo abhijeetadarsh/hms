@@ -1,0 +1,40 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/hms_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      PORT: ${PORT}
+    depends_on:
+      - db
+    networks:
+      - hms-network
+
+  db:
+    image: mysql:8.0-oracle
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: hms_db
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+      - ./src/main/resources/privileges.sql:/docker-entrypoint-initdb.d/3-privileges.sql
+    networks:
+      - hms-network
+
+volumes:
+  mysql-data:
+
+networks:
+  hms-network:
+    driver: bridge

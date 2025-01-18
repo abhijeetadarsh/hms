@@ -18,8 +18,8 @@ public class JWTServiceImpl implements JWTService {
     private final long EXPIRATION_TIME;
 
     public JWTServiceImpl(
-            @Value("${app.jwt-secret-key}") String secretKey,
-            @Value("${app.jwt-expiration-time}") long expirationTime) {
+            @Value("${jwt.secret}") String secretKey,
+            @Value("${jwt.expiration}") long expirationTime) {
         this.SECRET_KEY = secretKey;
         this.EXPIRATION_TIME = expirationTime;
     }
