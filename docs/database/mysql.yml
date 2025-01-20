@@ -8,7 +8,7 @@ services:
       MYSQL_USER: abhijeetadarsh
       MYSQL_PASSWORD: 1234
     volumes:
-      - ../mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     networks:
       - hms_network
     ports:
@@ -27,6 +27,9 @@ services:
         ]
       interval: 10s
       retries: 5
+
+volumes:
+  mysql_data:
 
 networks:
   hms_network:

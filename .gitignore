@@ -26,10 +26,6 @@
 hs_err_pid*
 replay_pid*
 target
-mysql_data
-mysql-data
 
 # Environment variables and secrets
 .env
-application-dev.properties
-application-prod.properties

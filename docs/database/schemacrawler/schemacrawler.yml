@@ -3,7 +3,7 @@ services:
     image: schemacrawler/schemacrawler
     container_name: sc_container
     volumes:
-      - ../output:/output
+      - ./:/output
     networks:
       - hms_network
     command: >

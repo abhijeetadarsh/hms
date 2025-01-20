@@ -1,0 +1,148 @@
+erDiagram
+    USER ||--o{ STAFF : has
+    USER ||--o{ PATIENT : has
+    STAFF ||--o{ DOCTOR : has
+    STAFF ||--o{ RECEPTIONIST : has
+    DEPARTMENT ||--o{ DOCTOR : employs
+    DOCTOR ||--o{ DOCTOR_SCHEDULE : has
+    DOCTOR ||--o{ APPOINTMENT : conducts
+    PATIENT ||--o{ APPOINTMENT : books
+    USER ||--o{ APPOINTMENT : books_as_receptionist
+    APPOINTMENT ||--o{ LABORATORY_TEST : requires
+    DOCTOR ||--o{ MEDICAL_RECORD : creates
+    PATIENT ||--o{ MEDICAL_RECORD : owns
+    DOCTOR ||--o{ PRESCRIPTION : writes
+    PATIENT ||--o{ PRESCRIPTION : receives
+    APPOINTMENT ||--o{ PRESCRIPTION : generates
+    PATIENT ||--o{ BILLING : pays
+    APPOINTMENT ||--o{ BILLING : generates
+
+    USER {
+        SERIAL user_id PK
+        VARCHAR username
+        VARCHAR password
+        VARCHAR email
+        ENUM role
+        TIMESTAMP created_at
+        BOOLEAN is_active
+    }
+
+    STAFF {
+        BIGINT user_id PK,FK
+        VARCHAR name
+        DATE join_date
+        VARCHAR contact
+        TEXT address
+    }
+
+    RECEPTIONIST {
+        BIGINT user_id PK,FK
+        VARCHAR shift
+        VARCHAR desk_location
+    }
+
+    PATIENT {
+        BIGINT user_id PK,FK
+        VARCHAR name
+        DATE dob
+        VARCHAR gender
+        TEXT address
+        VARCHAR phone
+        VARCHAR blood_group
+        VARCHAR emergency_contact
+        TEXT allergies
+        TEXT medical_history
+    }
+
+    DEPARTMENT {
+        SERIAL department_id PK
+        VARCHAR name
+        TEXT description
+        VARCHAR location
+    }
+
+    DOCTOR {
+        BIGINT user_id PK,FK
+        BIGINT department_id FK
+        VARCHAR specialization
+        TEXT qualification
+    }
+
+    DOCTOR_SCHEDULE {
+        SERIAL schedule_id PK
+        BIGINT doctor_user_id FK
+        VARCHAR day_of_week
+        TIME start_time
+        TIME end_time
+        INTEGER max_appointments
+        BOOLEAN is_available
+    }
+
+    APPOINTMENT {
+        SERIAL appointment_id PK
+        BIGINT patient_user_id FK
+        BIGINT doctor_user_id FK
+        BIGINT booked_by_user_id FK
+        TIMESTAMP appointment_time
+        ENUM status
+        TEXT reason
+        TIMESTAMP booking_time
+        INTEGER token_number
+        DECIMAL consultation_fee
+    }
+
+    MEDICAL_RECORD {
+        SERIAL record_id PK
+        BIGINT patient_user_id FK
+        BIGINT doctor_user_id FK
+        DATE record_date
+        TEXT diagnosis
+        TEXT treatment
+        TEXT notes
+        TEXT vitals
+    }
+
+    PRESCRIPTION {
+        SERIAL prescription_id PK
+        BIGINT patient_user_id FK
+        BIGINT doctor_user_id FK
+        BIGINT appointment_id FK
+        DATE prescribed_date
+        TEXT medications
+        TEXT dosage
+        TEXT instructions
+    }
+
+    LABORATORY_TEST {
+        SERIAL test_id PK
+        BIGINT appointment_id FK
+        VARCHAR test_name
+        DECIMAL test_cost
+        TIMESTAMP test_time
+        ENUM test_status
+        TEXT result
+        TEXT normal_range
+    }
+
+    MEDICINE_INVENTORY {
+        SERIAL medicine_id PK
+        VARCHAR name
+        VARCHAR type
+        DECIMAL unit_price
+        INTEGER stock_quantity
+        DATE expiry_date
+        VARCHAR manufacturer
+    }
+
+    BILLING {
+        SERIAL bill_id PK
+        BIGINT patient_user_id FK
+        BIGINT appointment_id FK
+        DATE bill_date
+        DECIMAL consultation_fee
+        DECIMAL medicine_charges
+        DECIMAL lab_charges
+        DECIMAL total_amount
+        ENUM payment_status
+        VARCHAR payment_method
+    }
