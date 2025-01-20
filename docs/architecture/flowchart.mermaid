@@ -1,0 +1,82 @@
+flowchart TB
+    Start([Enter Website]) --> Login{Already Registered?}
+
+    %% Authentication Flow
+    Login -->|No| Register[/Register Form/]
+    Register -->|Submit| ValidateReg{Validate Details}
+    ValidateReg -->|Invalid| Register
+    ValidateReg -->|Valid| StoreUser[(Store User)]
+    StoreUser --> Login
+
+    Login -->|Yes| LoginForm[/Login Form/]
+    LoginForm -->|Submit| ValidateLogin{Validate Credentials}
+    ValidateLogin -->|Invalid| LoginForm
+    ValidateLogin -->|Valid| CheckRole{Check User Role}
+
+    %% Role-based Navigation
+    CheckRole -->|Patient| PatientDash[Patient Dashboard]
+    CheckRole -->|Doctor| DoctorDash[Doctor Dashboard]
+    CheckRole -->|Receptionist| ReceptionistDash[Receptionist Dashboard]
+    CheckRole -->|Admin| AdminDash[Admin Dashboard]
+
+    %% Patient Flow
+    PatientDash --> PatientOptions{Select Action}
+    PatientOptions -->|Book Appointment| BookAppt[/Book Appointment/]
+    PatientOptions -->|View History| ViewHistory[View Medical History]
+    PatientOptions -->|View Bills| ViewBills[View Bills & Payments]
+    PatientOptions -->|Update Profile| UpdateProfile[Update Profile]
+
+    BookAppt --> SelectDept{Select Department}
+    SelectDept -->|Choose| SelectDoc{Select Doctor}
+    SelectDoc -->|Choose| CheckSchedule{Check Available Slots}
+    CheckSchedule -->|No Slots| SelectDoc
+    CheckSchedule -->|Available| SelectSlot[Select Time Slot]
+    SelectSlot --> ConfirmAppt{Confirm Booking?}
+    ConfirmAppt -->|No| SelectSlot
+    ConfirmAppt -->|Yes| ProcessPayment{Process Payment}
+    ProcessPayment -->|Success| ApptConfirmed[Appointment Confirmed]
+    ProcessPayment -->|Failed| RetryPayment{Retry?}
+    RetryPayment -->|Yes| ProcessPayment
+    RetryPayment -->|No| PatientDash
+
+    %% Doctor Flow
+    DoctorDash --> DoctorOptions{Select Action}
+    DoctorOptions -->|View Schedule| ViewSchedule[View Today's Schedule]
+    DoctorOptions -->|Manage Schedule| ManageSchedule[Manage Weekly Schedule]
+    DoctorOptions -->|View Patients| ViewPatients[View Patient List]
+
+    ViewSchedule --> SelectPatient{Select Patient}
+    SelectPatient -->|Choose| PatientConsult[Start Consultation]
+    PatientConsult --> ConsultOptions{Select Action}
+    ConsultOptions -->|Add Record| AddRecord[Add Medical Record]
+    ConsultOptions -->|Prescribe| AddPrescription[Add Prescription]
+    ConsultOptions -->|Order Tests| OrderTests[Order Lab Tests]
+    ConsultOptions -->|Complete| CompleteConsult[Mark as Complete]
+
+    %% Receptionist Flow
+    ReceptionistDash --> ReceptionistOptions{Select Action}
+    ReceptionistOptions -->|Register Patient| NewPatient[Register New Patient]
+    ReceptionistOptions -->|Book Appointment| BookForPatient[Book for Patient]
+    ReceptionistOptions -->|Manage Appointments| ManageAppts[Manage Appointments]
+    ReceptionistOptions -->|Handle Billing| HandleBill[Handle Billing]
+
+    ManageAppts --> ApptActions{Select Action}
+    ApptActions -->|Reschedule| Reschedule[Reschedule Appointment]
+    ApptActions -->|Cancel| CancelAppt[Cancel Appointment]
+    ApptActions -->|Check-in| CheckIn[Patient Check-in]
+
+    %% Admin Flow
+    AdminDash --> AdminOptions{Select Action}
+    AdminOptions -->|Manage Users| ManageUsers[Manage Users]
+    AdminOptions -->|Manage Departments| ManageDepts[Manage Departments]
+    AdminOptions -->|View Analytics| ViewAnalytics[View Analytics]
+    AdminOptions -->|Manage Inventory| ManageInventory[Manage Inventory]
+
+    %% Styling
+    classDef decision fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef process fill:#bbf,stroke:#333,stroke-width:2px;
+    classDef dashboard fill:#bfb,stroke:#333,stroke-width:2px;
+
+    class Login,CheckRole,PatientOptions,SelectDept,SelectDoc,CheckSchedule,ConfirmAppt,ProcessPayment,RetryPayment,DoctorOptions,ConsultOptions,ReceptionistOptions,ApptActions,AdminOptions,ValidateReg,ValidateLogin decision;
+    class BookAppt,ViewHistory,ViewBills,UpdateProfile,AddRecord,AddPrescription,OrderTests,CompleteConsult,NewPatient,BookForPatient,ManageAppts,HandleBill,ManageUsers,ManageDepts,ViewAnalytics,ManageInventory process;
+    class PatientDash,DoctorDash,ReceptionistDash,AdminDash dashboard;
