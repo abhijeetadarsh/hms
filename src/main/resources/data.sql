@@ -1,3 +1,21 @@
+INSERT INTO department (department_id, name, location, description) VALUES
+('gen-surg', 'General Surgery', 'Building A, First Floor', 'Handles surgical treatments for various medical conditions.'),
+('obs-gyn', 'Obstetrics & Gynaecology', 'Building B, Second Floor', 'Focuses on childbirth and women\'s health.'),
+('neo-ped', 'Neonatology & Paediatrics', 'Building C, Ground Floor', 'Specialized care for newborns and children.'),
+('neuro', 'Neurosciences', 'Building D, Third Floor', 'Deals with the diagnosis and treatment of neurological disorders.'),
+('cardio', 'Cardiology', 'Building E, First Floor', 'Provides care for heart-related conditions.'),
+('urology', 'Urology', 'Building F, Second Floor', 'Treats urinary tract and male reproductive system conditions.'),
+('ophthal', 'Ophthalmology', 'Building G, Ground Floor', 'Specializes in eye care and surgeries.'),
+('ortho', 'Orthopaedics', 'Building H, Second Floor', 'Handles bone, joint, and muscle issues.'),
+('emer-trauma', 'Emergency And Trauma Management', 'Emergency Wing', '24/7 care for critical and trauma cases.'),
+('gastro', 'Gastroenterology', 'Building I, First Floor', 'Focuses on digestive system conditions.'),
+('burn-plastic', 'Burn & Plastic Surgery', 'Building J, Second Floor', 'Provides treatment for burns and reconstructive surgeries.'),
+('psych', 'Psychiatry And Clinical Psychology', 'Building K, First Floor', 'Mental health care and counseling services.'),
+('physio-rehab', 'Physiotherapy And Rehabilitation', 'Building L, Ground Floor', 'Rehabilitation and therapy for physical recovery.'),
+('oncology', 'Oncology', 'Building M, Third Floor', 'Cancer treatment and care.'),
+('ctvs', 'Cardiothoracic And Vascular Surgery', 'Building N, First Floor', 'Surgical treatments for heart and vascular diseases.');
+
+
 -- Generate Users
 INSERT INTO user (username, password, email, role, is_active) VALUES 
 ('admin', '$2a$12$wARXPwy2nQDUwA4NZgVLYutZLnPCXBbhGDblyAtTQOr.Mv2n.GN0G', 'admin@hms.abhijeetadarsh.online', 'ADMIN', 1),
