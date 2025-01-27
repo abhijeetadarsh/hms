@@ -4,14 +4,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
-import online.abhijeetadarsh.hms.model.User;
 import online.abhijeetadarsh.hms.service.JWTService;
-import online.abhijeetadarsh.hms.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -19,55 +19,74 @@ import java.io.IOException;
 
 @Component
 public class JWTAuthFilter extends OncePerRequestFilter {
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final JWTService jwtService;
-    private final UserService userService;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public JWTAuthFilter(JWTService jwtService, UserService userService) {
+    public JWTAuthFilter(JWTService jwtService, UserDetailsService userDetailsService) {
         this.jwtService = jwtService;
-        this.userService = userService;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String path = request.getServletPath();
-        System.out.println(request);
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+        // Extract Authorization header
+        final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
-        // Skip auth for public paths
-        if (isPublicPath(path)) {
+        // If no valid Authorization header, continue to next filter
+        if (authHeader == null || !authHeader.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Get JWT from header
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No valid token provided");
-            return;
+        try {
+            final String jwt = authHeader.substring(BEARER_PREFIX.length());
+            final String userEmail = jwtService.extractUsername(jwt);
+
+            // Proceed only if userEmail exists and no authentication is set yet
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // Load user details
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+                // Validate token
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    // Create authentication token
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+                    // Set details from request
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Update security context
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            }
+        } catch (Exception e) {
+            // Log the error but don't throw it - just continue with the filter chain
+            logger.error("Failed to validate JWT token", e);
         }
 
-        // Extract and validate token
-        String token = authHeader.substring(7);
-        if (!jwtService.validateToken(token)) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-            return;
-        }
-
-        // [TODO] Check if user exists
-
-        String userId = jwtService.getUserIdFromToken(token);
-        User user = userService.getUserById(Long.parseLong(userId));
-
-        Authentication authenticationToken = new UsernamePasswordAuthenticationToken(user, null, userService.getAuthorities(user));
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
+        // Continue filter chain
         filterChain.doFilter(request, response);
     }
 
-    private boolean isPublicPath(String path) {
-        return path.startsWith("/api/auth/") ||
-                path.startsWith("/api/public/");
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Add paths that should not be filtered
+        String path = request.getServletPath();
+        return path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/auth/register") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs");
     }
 }

@@ -1,71 +1,171 @@
 package online.abhijeetadarsh.hms.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import online.abhijeetadarsh.hms.common.User;
 import online.abhijeetadarsh.hms.dto.*;
-import online.abhijeetadarsh.hms.exception.UnauthorizedException;
-import online.abhijeetadarsh.hms.model.User;
-import online.abhijeetadarsh.hms.repository.UserRepository;
+import online.abhijeetadarsh.hms.exception.AuthenticationException;
+import online.abhijeetadarsh.hms.exception.InvalidCredentialsException;
+import online.abhijeetadarsh.hms.exception.ResourceAlreadyExistsException;
+import online.abhijeetadarsh.hms.exception.ResourceNotFoundException;
+import online.abhijeetadarsh.hms.model.*;
+import online.abhijeetadarsh.hms.repository.DepartmentRepository;
+import online.abhijeetadarsh.hms.repository.DoctorRepository;
+import online.abhijeetadarsh.hms.repository.PatientRepository;
+import online.abhijeetadarsh.hms.repository.ReceptionistRepository;
+import online.abhijeetadarsh.hms.security.SecurityUser;
 import online.abhijeetadarsh.hms.service.AuthService;
 import online.abhijeetadarsh.hms.service.JWTService;
+import online.abhijeetadarsh.hms.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+/**
+ * Implementation of the AuthService interface.
+ */
 @Service
-@Transactional
 public class AuthServiceImpl implements AuthService {
-    private JWTService jwtService;
-    private PasswordEncoder passwordEncoder;
-    private UserRepository userRepository;
+    private final JWTService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final DoctorRepository doctorRepository;
+    private final DepartmentRepository departmentRepository;
+    private final PatientRepository patientRepository;
+    private final ReceptionistRepository receptionistRepository;
+    private final UserService userService;
 
     @Autowired
-    public AuthServiceImpl(JWTService jwtService, PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthServiceImpl(
+            JWTService jwtService,
+            PasswordEncoder passwordEncoder,
+            DoctorRepository doctorRepository,
+            DepartmentRepository departmentRepository,
+            PatientRepository patientRepository,
+            ReceptionistRepository receptionistRepository,
+            UserService userService
+    ) {
         this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
+        this.doctorRepository = doctorRepository;
+        this.departmentRepository = departmentRepository;
+        this.patientRepository = patientRepository;
+        this.receptionistRepository = receptionistRepository;
+        this.userService = userService;
     }
 
     @Override
-    public MessageResponse register(RegisterRequest request) {
-        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("Username already exists");
-        }
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
+    public Doctor register(RegisterDoctorRequest request) {
+        if (doctorRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceAlreadyExistsException("Doctor already exists with email: " + request.getEmail());
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
-        userRepository.save(user);
-        //[TODO] handle exception
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with id: " + request.getDepartmentId()));
 
-        return new MessageResponse("User registered successfully");
+
+        Doctor doctor = new Doctor();
+        doctor.setEmail(request.getEmail());
+        doctor.setPassword(passwordEncoder.encode(request.getPassword()));
+        doctor.setName(request.getName());
+        doctor.setJoinDate(request.getJoinDate());
+        doctor.setContact(request.getContact());
+        doctor.setAddress(request.getAddress());
+        doctor.setDepartment(department);
+        doctor.setSpecialization(request.getSpecialization());
+        doctor.setQualification(request.getQualification());
+
+        doctorRepository.save(doctor);
+        return doctor;
+    }
+
+    @Override
+    public Patient register(RegisterPatientRequest request) {
+        if (patientRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceAlreadyExistsException("Patient already exists with email: " + request.getEmail());
+        }
+
+        Patient patient = new Patient();
+        patient.setEmail(request.getEmail());
+        patient.setPassword(passwordEncoder.encode(request.getPassword()));
+        patient.setName(request.getName());
+        patient.setDob(request.getDob());
+        patient.setGender(request.getGender());
+        patient.setAddress(request.getAddress());
+        patient.setPhone(request.getPhone());
+        patient.setBloodGroup(request.getBloodGroup());
+        patient.setEmergencyContact(request.getEmergencyContact());
+        patient.setAllergies(request.getAllergies());
+        patient.setMedicalHistory(request.getMedicalHistory());
+
+        patientRepository.save(patient);
+        return patient;
+    }
+
+    @Override
+    public Receptionist register(RegisterReceptionistRequest request) {
+        if (receptionistRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceAlreadyExistsException("Receptionist already exists with email: " + request.getEmail());
+        }
+
+        Receptionist receptionist = new Receptionist();
+        receptionist.setEmail(request.getEmail());
+        receptionist.setPassword(passwordEncoder.encode(request.getPassword()));
+        receptionist.setName(request.getName());
+        receptionist.setJoinDate(request.getJoinDate());
+        receptionist.setContact(request.getContact());
+        receptionist.setAddress(request.getAddress());
+        receptionist.setShift(request.getShift());
+        receptionist.setDeskLocation(request.getDeskLocation());
+
+        receptionistRepository.save(receptionist);
+        return receptionist;
     }
 
     @Override
     public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername()).orElseThrow(() -> new UnauthorizedException("Invalid credentials"));
+        User user = userService.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Invalid credentials");
+        if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            SecurityUser securityUser = new SecurityUser(user);
+            String token = jwtService.generateToken(securityUser);
+            return LoginResponse.builder()
+                    .message("Login successful")
+                    .token(token)
+                    .user(LoginResponse.UserData.builder()
+                            .username(user.getName())
+                            .email(user.getEmail())
+                            .role(user.getRole())
+                            .build()
+                    ).build();
         }
-
-        String token = jwtService.generateToken(user);
-        return new LoginResponse(token);
+        throw new InvalidCredentialsException("Invalid credentials");
     }
 
     @Override
-    public void changePassword(ChangePasswordRequest request) {
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new UnauthorizedException("Current password is incorrect");
+    public User changePassword(ChangePasswordRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof SecurityUser)) {
+            throw new AuthenticationException("User not authenticated");
         }
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.update(user);
+
+        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        User currentUser = securityUser.getUser();
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), currentUser.getPassword())) {
+            throw new InvalidCredentialsException("Invalid current password");
+        }
+        currentUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        switch (currentUser) {
+            case Doctor doctor -> doctorRepository.save(doctor);
+            case Patient patient -> patientRepository.save(patient);
+            case Receptionist receptionist -> receptionistRepository.save(receptionist);
+            default -> {
+                throw new IllegalStateException("Unexpected user type: " + currentUser.getClass().getName());
+            }
+        }
+        return currentUser;
     }
 }

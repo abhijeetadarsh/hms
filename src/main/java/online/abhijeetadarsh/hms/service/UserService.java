@@ -1,16 +1,27 @@
 package online.abhijeetadarsh.hms.service;
 
-import online.abhijeetadarsh.hms.model.User;
-import org.springframework.security.core.GrantedAuthority;
+import online.abhijeetadarsh.hms.common.User;
 
-import java.util.Collection;
+import java.util.Optional;
 
+/**
+ * Service interface for user-related operations.
+ */
 public interface UserService {
-    User getUserById(Long userId);
 
-    void updateUser(Long userId, User user);
+    /**
+     * Retrieves user details by email.
+     *
+     * @param email the email of the user
+     * @return the user details
+     */
+    Optional<User> findByEmail(String email);
 
-    void deleteUser(Long userId);
-
-    Collection<? extends GrantedAuthority> getAuthorities(User user);
+    /**
+     * Retrieves user details by user ID.
+     *
+     * @param userId the ID of the user
+     * @return the user details
+     */
+    Optional<User> findById(String userId);
 }
