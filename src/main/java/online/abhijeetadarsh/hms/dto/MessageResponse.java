@@ -1,10 +1,18 @@
 package online.abhijeetadarsh.hms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
-@Data
-@AllArgsConstructor
+import java.time.LocalDateTime;
+
+@Value
+@Builder
 public class MessageResponse {
-    private String message;
+    boolean success;
+    String message;
+    String id;
+    String email;
+    String name;
+    String role;
+    LocalDateTime timestamp;
 }

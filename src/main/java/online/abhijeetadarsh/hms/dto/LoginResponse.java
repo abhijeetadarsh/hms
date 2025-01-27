@@ -1,10 +1,20 @@
 package online.abhijeetadarsh.hms.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
+import lombok.Value;
 
-@Data
-@AllArgsConstructor
+@Value
+@Builder
 public class LoginResponse {
-    private String accessToken;
+    String message;
+    String token;
+    UserData user;
+
+    @Value
+    @Builder
+    public static class UserData {
+        String username;
+        String email;
+        String role;
+    }
 }
