@@ -1,16 +1,34 @@
 package online.abhijeetadarsh.hms.model;
 
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalTime;
 
-@Data
+@Getter
+@Setter
+@Entity
 public class DoctorSchedule {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long scheduleId;
-    private Long doctorUserId;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Doctor doctor;
+
+    @Column(nullable = false, length = 10)
     private String dayOfWeek;
+
+    @Column(nullable = false)
     private LocalTime startTime;
+
+    @Column(nullable = false)
     private LocalTime endTime;
+
+    @Column(nullable = false)
     private Integer maxAppointments;
+
     private boolean isAvailable;
 }

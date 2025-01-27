@@ -1,17 +1,39 @@
 package online.abhijeetadarsh.hms.model;
 
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
+@Entity
 public class MedicalRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long recordId;
-    private Long patientUserId;
-    private Long doctorUserId;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Patient patient;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Doctor doctor;
+
+    @Column(nullable = false)
     private LocalDate recordDate;
+
+    @Column(columnDefinition = "TEXT")
     private String diagnosis;
+
+    @Column(columnDefinition = "TEXT")
     private String treatment;
+
+    @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(columnDefinition = "TEXT")
     private String vitals;
 }
