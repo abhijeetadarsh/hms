@@ -1,22 +1,12 @@
 package online.abhijeetadarsh.hms.repository;
 
 import online.abhijeetadarsh.hms.model.Receptionist;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface ReceptionistRepository {
-    Receptionist findById(Long id);
-
-    List<Receptionist> findAll();
-
-    int save(Receptionist receptionist);
-
-    int update(Receptionist receptionist);
-
-    int delete(Long id);
-
-    Optional<Receptionist> findByUsername(String username);
+public interface ReceptionistRepository extends JpaRepository<Receptionist, String> {
+    boolean existsByEmail(String email);
 
     Optional<Receptionist> findByEmail(String email);
 }

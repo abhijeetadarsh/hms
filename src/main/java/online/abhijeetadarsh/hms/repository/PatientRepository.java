@@ -1,22 +1,12 @@
 package online.abhijeetadarsh.hms.repository;
 
 import online.abhijeetadarsh.hms.model.Patient;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
-public interface PatientRepository {
-    Patient findById(Long id);
-
-    List<Patient> findAll();
-
-    int save(Patient patient);
-
-    int update(Patient patient);
-
-    int delete(Long id);
-
-    Optional<Patient> findByUsername(String username);
+public interface PatientRepository extends JpaRepository<Patient, String> {
+    boolean existsByEmail(String email);
 
     Optional<Patient> findByEmail(String email);
 }

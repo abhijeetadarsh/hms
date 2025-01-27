@@ -1,12 +1,12 @@
 package online.abhijeetadarsh.hms.repository;
 
-import online.abhijeetadarsh.hms.model.Doctor;
+import online.abhijeetadarsh.hms.model.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface DoctorRepository extends JpaRepository<Doctor, String> {
+public interface AdminRepository extends JpaRepository<Admin, String> {
     boolean existsByEmail(String email);
 
-    Optional<Doctor> findByEmail(String email);
+    Optional<Admin> findByEmail(String email);
 }
