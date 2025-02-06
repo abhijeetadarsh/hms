@@ -1,2 +1,0 @@
---GRANT ALL PRIVILEGES ON hms.* TO 'hmsuser'@'%';
---FLUSH PRIVILEGES;
